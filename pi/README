@@ -1,0 +1,13 @@
+Programming Praxis
+Exercise 8
+
+Calculate the digits of pi using the Chudnovsky formula.  The function will
+compute pi to an arbitrary number of decimal places (though calculations to
+very large numbers of digits may run into memory issues) and return the
+result as a string.  If run on the command line without arguments, the
+program will return the 1000th digit of pi.
+
+See this page for a description of the exercise (note, however, that I don't
+use a spigot algorithm):
+
+http://programmingpraxis.com/2009/02/20/the-digits-of-pi/2/
