@@ -1,0 +1,4 @@
+Code to solve a sudoku board.  The code is not optimized for speed, but it
+is guaranteed to find a solution if one exists.  The code is currently not
+factored to be easily used by external programs.  The version 1.0 release
+will have a more easily usable interface.
