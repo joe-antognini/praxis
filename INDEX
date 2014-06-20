@@ -1,8 +1,9 @@
-1   RPN Calculator         19 Feb 2009  rpn
-2   Sieve of Eratosthenes  19 Feb 2009  sieve_erato
-3   Bingo                  19 Feb 2009  bingo
-4   Sudoku                 19 Feb 2009  sudoku
-5   Flavius Josephus       19 Feb 2009  flavius_josephus
-6   ROT13                  20 Feb 2009  rot13
-7   Multiple Dwellings     20 Feb 2009  multiple_dwellings
-8   The Digits of Pi       20 Feb 2009  pi
+1   RPN Calculator               19 Feb 2009  rpn
+2   Sieve of Eratosthenes        19 Feb 2009  sieve_erato
+3   Bingo                        19 Feb 2009  bingo
+4   Sudoku                       19 Feb 2009  sudoku
+5   Flavius Josephus             19 Feb 2009  flavius_josephus
+6   ROT13                        20 Feb 2009  rot13
+7   Multiple Dwellings           20 Feb 2009  multiple_dwellings
+8   The Digits of Pi             20 Feb 2009  pi
+9   A Self-Reproducing Program   20 Feb 2009  quine
