@@ -1,0 +1,9 @@
+A simple quine written in Python.  The program takes no input and outputs
+only its source code.
+
+To check that the program runs as expected, run
+
+python quine.py > quine.out
+diff quine.py quine.out
+
+If the two are the same there will be no output from diff.
