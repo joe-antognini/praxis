@@ -14,10 +14,14 @@ def gen_table(filename):
       string.
   '''
 
+  # We will store the data as a dictionary.  The dictionary is indexed by
+  # the first two words of a three word string.  The entry is a list
+  # composed of the set of all words following the first two words.
+
   with open(filename) as infile:
-    tbl = []
+    tbl = {}
     for line in infile:
       words = line.split()
       for i in range(len(words[:-2])):
-        lst
+        word1, word2 = words[i:i+2]
         
