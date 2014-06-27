@@ -1,20 +1,26 @@
 #! /usr/bin/env python
 
-def add_string(tbl, word1, word2, word3):
+def add_string(tbl, words):
   '''
   Add the string of words to the table.  The first two words are the key and
   the third is appended to a list containing all words following the first
   two.
+
+  Parameters:
+    tbl: dictionary
+      The dictionary to which the new entiry will be added.
+
+    words: list
+      The sequence of words to be added to the dictionary.
   '''
 
-  # TODO Fix bug in which tbl[key] returns None
-  key = ' '.join([word1, word2])
+  key = ' '.join([words[0], words[1]])
   if key in tbl:
-    lst = tbl[key]
-    print lst
-    tbl[key] = lst.append(word3)
+    lst = tbl[key][:]
+    lst.append(words[2])
+    tbl[key] = lst
   else:
-    tbl[key] = [word3]
+    tbl[key] = [words[2]]
 
   return tbl
 
@@ -39,21 +45,18 @@ def gen_table(filename, tbl={}):
   # the first two words of a three word string.  The entry is a list
   # composed of the set of all words following the first two words.
 
-  # TODO Deal with edge cases of empty or 1 word lines
+  # First read the entire file into memory and generate a list containing
+  # all words in order.
   with open(filename) as infile:
-    firstline = True
+    lst = []
     for line in infile:
       words = line.split()
-      if not firstline:
-        word1, word2 = words[:2]
-        tbl = add_string(tbl, prev1, prev2, word1)
-        tbl = add_string(tbl, prev2, word1, word2)
-      for i in range(len(words[:-2])):
-        word1, word2, word3 = words[i:i+3]
-        tbl = add_string(tbl, word1, word2, word3)
-      prev1, prev2 = words[-2:]
-      firstline = False
-  
+      for word in words:
+        lst.append(word.strip())
+
+  # Now generate the dictionary.
+  for i in range(len(lst)-2):
+    tbl = add_string(tbl, lst[i:i+3])
   return tbl
 
 def markvshaney(tbl, maxwords=500, maxchar=80):
@@ -83,8 +86,10 @@ def markvshaney(tbl, maxwords=500, maxchar=80):
   nchar = 0
 
   # Start with a random key
-  key = random.choice(tbl.keys()).split()
-  while nwords <= maxwords:
+  key = random.choice(tbl.keys())
+  while not key.istitle():
+    key = random.choice(tbl.keys())
+  while (nwords <= maxwords) or (word3[-1] != '.'):
     word1, word2 = key.split()
     word3 = random.choice(tbl[key])
 
@@ -93,9 +98,12 @@ def markvshaney(tbl, maxwords=500, maxchar=80):
       print 
       nchar = len(word1) + 1
     print word1,
+    nwords += 1
 
     key = ' '.join([word2, word3])
 
+  print word2, word3,
+
 if __name__ == '__main__':
-  tbl = gen_table('dickens.txt')
+  tbl = gen_table('iliad.txt')
   markvshaney(tbl)
