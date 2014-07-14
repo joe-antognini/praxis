@@ -1,0 +1,2 @@
+Solve the travelling salesman problem using a brute force approach.  This is
+extremely inefficient, with a worst-case running time of O(N!).
