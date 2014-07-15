@@ -4,8 +4,8 @@ class graph:
   '''A graph data structure.  
   
   The data structure consists of a dictionary for which each element is a
-  node.  Each node stores a list of all other nodes to which the node is
-  connected along with the length of the edge.
+  node.  Each node stores a dictionary of all other nodes to which the node
+  is connected along with the length of the edge.  
   '''
 
   def __init__(self, name=None):
@@ -18,14 +18,30 @@ class graph:
     '''
     if name is None:
       self.G = {}
+    elif type(name) is dict:
+      for elem in name:
+        if type(name[elem]) is not dict:
+          raise ValueError('graph.__init__(): cast to graph failed!')
+      self.G = {}
+      for elem in name:
+        self.G[elem] = name[elem]
     else:
-      self.G = {name : []}
+      self.G = {name : {}}
 
   def __getitem__(self, i):
     '''Return the edges connected to a specific node.'''
+    if i not in self.G:
+      raise ValueError('node not in graph!')
     return self.G[i]
 
-  def add_node(self, name, edges):
+  def copy(self):
+    '''Return a deep copy of the graph.'''
+    H = {}
+    for elem in self.G:
+      H[elem] = self.G[elem]
+    return graph(H)
+
+  def add_node(self, name, edges=None):
     '''Add a node to the graph.
 
     Parameters:
@@ -33,12 +49,11 @@ class graph:
         The name of the node.  This should usually be a short string or an
         integer.
 
-      edges: iterable
-        A list of nodes this new node connects to.  Each element should
-        consist of a two-element iterable, the first of which is the node to
-        which the edge connects and the second of which is the length of the
-        edge.
-    '''
+      edges: dict, optional
+        The nodes this new node connects to.  The key for each element of
+        this dictionary is the name of an adjacent node and the associated
+        value is the length of the corresponding edge.
+        '''
    
     #
     # First perform some checks on the received data types.
@@ -48,34 +63,53 @@ class graph:
     if name in self.G:
       raise ValueError('graph.add_node(): node already in graph!')
 
-    # Make sure that the edges are iterable
-    if not hasattr(edges, '__iter__'):
-      raise TypeError('graph.add_node(): edges are not iterable!')
-    for elem in edges:
-      if not hasattr(elem, '__iter__'):
-        raise TypeError('graph.add_node(): ' + str(elem) + 
-        ': edge is not iterable!')
-      if len(elem) < 2:
-        raise TypeError('graph.add_node(): ' + str(elem) +
-        ': edge is missing name or length data!')
-      if not isinstance(elem[1], (int, long, float)):
-        raise TypeError('graph.add_node(): ' + str(elem) + 
-        ': edge length is not a number!')
-      # Check that the edges are to nodes already in the graph
-      if elem[0] not in self.G:
-        raise ValueError('graph.add_node(): ' + str(elem) +
-        ': edge connects to nonexistant node!')
-        
-    # First add the node
-    self.G[name] = edges
+    if edges is None:
+      self.G[name] = {}
 
-    # Now update all the adjacent nodes
-    for node in edges:
-      adj_name = node[0]
-      length = node[1]
-      adj_node = self.G[adj_name][:]
-      adj_node.append((name, length))
-      self.G[adj_name] = adj_node
+    else:
+      # Make sure that the edges are a dictionary
+      if type(edges) is not dict:
+        raise TypeError('graph.add_node(): edges must be a dictionary!')
+      for elem in edges:
+        # Make sure the length is some kind of number
+        if not isinstance(edges[elem], (int, long, float)):
+          raise TypeError('graph.add_node(): ' + str(elem) + 
+          ': edge length is not a number!')
+        # Check that the edges are to nodes already in the graph
+        if elem not in self.G:
+          raise ValueError('graph.add_node(): ' + str(elem) +
+          ': edge connects to nonexistant node!')
+        
+      # First add the node
+      self.G[name] = edges
+
+      # Now update all the adjacent nodes
+      for adj_node in edges:
+        self.G[adj_node][name] = edges[adj_node]
+  
+  def add_edge(self, x, y, length):
+    '''Add an edge between nodes x and y with given length.  If an edge
+    already connects x and y, this function changes the length.
+
+    Parameters:
+      x: node
+      
+      y: node
+
+      length: int, float, or long
+    '''
+
+    # First check that the nodes are in the graph.
+    if x not in self.G:
+      raise ValueError('graph.add_node(): ' + str(x) + ' not in graph!')
+    if y not in self.G:
+      raise ValueError('graph.add_node(): ' + str(y) + ' not in graph!')
+    # Check that the length is a number
+    if type(length) not in [int, float, long]:
+      raise ValueError('graph.add_node(): length must be a number!')
+
+    self.G[x][y] = length
+    self.G[y][x] = length
 
   def neighbors(self, x):
     '''Returns all nodes with an edge connecting them to x.
@@ -91,7 +125,25 @@ class graph:
     if x not in self.G:
       raise ValueError('graph.neighbors():' + str(x) + ' not in graph!')
 
-    return [y[0] for y in self.G[x]]
+    return self.G[x].keys()
+
+  def delete_node(self, x):
+    '''Delete a node from the graph.
+
+    Parameters:
+      x: node
+        The node to be deleted
+    '''
+
+    if x not in self.G:
+      raise ValueError('delete_node(): node not in graph!')
+
+    # Delete the edges connecting the node
+    for node in self.neighbors(x):
+      del self.G[node][x]
+
+    # Delete the node itself
+    del self.G[x]
 
   def get_edge(self, x, y):
     '''Returns the value of the edge connecting x and y.
@@ -108,9 +160,48 @@ class graph:
         The length of the edge connecting x and y
     '''
     # First check that there exists an edge connecting x and y.
-    if y not in self.neighbors(x):
+    if y not in self.G[x]:
       raise ValueError('graph.get_edge(): no edge connecting the nodes!')
     
-    for elem in self.G[x]:
-      if elem[0] == y:
-        return elem[1]
+    return self.G[x][y]
+
+  def count_nodes(self):
+    '''Return the number of nodes in the graph.'''
+    return len(self.G)
+
+def salesman_brute(G, A, B):
+  '''Caculate the shortest path from A to B in a graph G by brute force.
+
+  Parameters:
+    G: graph
+      The graph on which to find the shortest route
+    
+    A: node
+      Starting node
+
+    B: node
+      Ending node
+
+  Returns:
+    path: tuple
+      A tuple consisting of the nodes along the shortest path
+  '''
+
+  from numpy import inf
+
+  shortest_path_length = inf
+  shortest_path_nodes = []
+  for adj_node in G[A]:
+    path_length = G[A][adj_node]
+    
+    H = G.copy()
+    H.delete_node(A)
+    sub_path_length, sub_path_nodes = salesman_brute(H, node, B)
+    path_length += sub_path_length
+    path_nodes = sub_path_nodes.insert(0, A)
+    
+    if path_length < shortest_path:
+      shortest_path_length = path_length
+      shortest_path_nodes = path_nodes
+
+  return (shortest_path_length, shortest_path_nodes)
