@@ -1,5 +1,9 @@
 #! /usr/bin/env python
 
+import numpy
+import random
+from itertools import permutations
+
 class graph:
   '''A graph data structure.  
   
@@ -169,7 +173,11 @@ class graph:
     '''Return the number of nodes in the graph.'''
     return len(self.G)
 
-def salesman_brute(G, A, B):
+  def nodes(self):
+    '''Return the nodes in the graph.'''
+    return self.G.keys()
+
+def shortest_path(G, A, B):
   '''Caculate the shortest path from A to B in a graph G by brute force.
 
   Parameters:
@@ -183,20 +191,21 @@ def salesman_brute(G, A, B):
       Ending node
 
   Returns:
-    path: tuple
-      A tuple consisting of the nodes along the shortest path
+    shortest_path_length: number
+      The length of the shortest path
+
+    shortest_path_nodes: tuple
+      A tuple consisting of the nodes along the shortest path.
   '''
 
-  from numpy import inf
-
-  shortest_path_length = inf
+  shortest_path_length = numpy.inf
   shortest_path_nodes = []
   for adj_node in G[A]:
     path_length = G[A][adj_node]
     
     H = G.copy()
     H.delete_node(A)
-    sub_path_length, sub_path_nodes = salesman_brute(H, node, B)
+    sub_path_length, sub_path_nodes = shortest_path(H, adj_node, B)
     path_length += sub_path_length
     path_nodes = sub_path_nodes.insert(0, A)
     
@@ -205,3 +214,53 @@ def salesman_brute(G, A, B):
       shortest_path_nodes = path_nodes
 
   return (shortest_path_length, shortest_path_nodes)
+
+def salesman_brute(G):
+  '''Calculate the shortest tour that visits every node of the graph, G, and
+  returns to the starting node.
+
+  Parameters:
+    G: graph
+      The graph on which to find the shortest tour
+
+  Returns:
+    shortest_tour_length: number
+      The length of the shortest tour
+
+    shortest_tour_nodes: tuple
+      A tuple consisting of the nodes along the shortest tour
+  '''
+
+  # Randomly pick a node.
+  start_node = random.choice(G.nodes())
+
+  min_length = numpy.inf
+
+#  for path in permutations(G.nodes())
+
+if __name__ == '__main__':
+  # Set up a default graph
+
+  G = graph()
+  G.add_node('A')
+  G.add_node('B')
+  G.add_node('C')
+  G.add_node('D')
+  G.add_node('E')
+  G.add_node('F')
+
+  G.add_edge('A', 'B', 10)
+  G.add_edge('A', 'C', 20)
+  G.add_edge('A', 'E', 50)
+  G.add_edge('B', 'D', 24)
+  G.add_edge('B', 'C', 15)
+  G.add_edge('B', 'E', 30)
+  G.add_edge('C', 'E', 6)
+  G.add_edge('C', 'F', 12)
+  G.add_edge('D', 'E', 15)
+  G.add_edge('D', 'F', 40)
+  G.add_edge('E', 'F', 18)
+
+  PATH = shortest_path(G, 'A', 'D')
+  print PATH[0]
+  print PATH[1]

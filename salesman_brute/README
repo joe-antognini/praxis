@@ -1,2 +1,5 @@
 Solve the travelling salesman problem using a brute force approach.  This is
 extremely inefficient, with a worst-case running time of O(N!).
+
+Programming Praxis Problem No. 118
+http://programmingpraxis.com/2010/03/12/traveling-salesman-brute-force/
