@@ -2,6 +2,7 @@
 
 import numpy
 import random
+import copy
 from itertools import permutations
 
 class graph:
@@ -37,13 +38,6 @@ class graph:
     if i not in self.g:
       raise ValueError('node not in graph!')
     return self.g[i]
-
-  def copy(self):
-    '''Return a deep copy of the graph.'''
-    h = {}
-    for elem in self.g:
-      h[elem] = self.g[elem]
-    return graph(h)
 
   def add_node(self, name, edges=None):
     '''Add a node to the graph.
@@ -198,22 +192,31 @@ def shortest_path(g, a, b):
       A tuple consisting of the nodes along the shortest path.
   '''
 
-  shortest_path_length = numpy.inf
-  shortest_path_nodes = []
-  for adj_node in g[a]:
-    path_length = g[a][adj_node]
-    
-    h = g.copy()
-    h.delete_node(a)
-    sub_path_length, sub_path_nodes = shortest_path(h, adj_node, b)
-    path_length += sub_path_length
-    path_nodes = sub_path_nodes.insert(0, a)
-    
-    if path_length < shortest_path:
-      shortest_path_length = path_length
-      shortest_path_nodes = path_nodes
+  if a == b:
+    # Trivial case of starting and ending on the same node.
+    print 'reached final node!'
+    return (0, [b])
+  elif len(g.neighbors(a)) == 0:
+    # In this case we've reached a dead end.
+    return (numpy.inf, [])
+  else:
+    shortest_path_length = numpy.inf
+    shortest_path_nodes = []
+    for adj_node in g[a]:
+      path_length = g[a][adj_node]
+      h = copy.deepcopy(g)
+      print a, adj_node, b, h.nodes()
+      h.delete_node(a)
+      sub_path_length, sub_path_nodes = shortest_path(h, adj_node, b)
+      print sub_path_nodes
+      path_length += sub_path_length
+      path_nodes = sub_path_nodes.insert(0, a)
+      
+      if path_length < shortest_path:
+        shortest_path_length = path_length
+        shortest_path_nodes = path_nodes
 
-  return (shortest_path_length, shortest_path_nodes)
+    return (shortest_path_length, shortest_path_nodes)
 
 def salesman_brute(g):
   '''Calculate the shortest tour that visits every node of the graph, G, and
