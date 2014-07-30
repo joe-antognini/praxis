@@ -194,7 +194,6 @@ def shortest_path(g, a, b):
 
   if a == b:
     # Trivial case of starting and ending on the same node.
-    print 'reached final node!'
     return (0, [b])
   elif len(g.neighbors(a)) == 0:
     # In this case we've reached a dead end.
@@ -205,16 +204,14 @@ def shortest_path(g, a, b):
     for adj_node in g[a]:
       path_length = g[a][adj_node]
       h = copy.deepcopy(g)
-      print a, adj_node, b, h.nodes()
       h.delete_node(a)
       sub_path_length, sub_path_nodes = shortest_path(h, adj_node, b)
-      print sub_path_nodes
       path_length += sub_path_length
-      path_nodes = sub_path_nodes.insert(0, a)
       
-      if path_length < shortest_path:
+      if path_length < shortest_path_length:
         shortest_path_length = path_length
-        shortest_path_nodes = path_nodes
+        shortest_path_nodes = sub_path_nodes
+        shortest_path_nodes.insert(0, a)
 
     return (shortest_path_length, shortest_path_nodes)
 
@@ -234,16 +231,29 @@ def salesman_brute(g):
       A tuple consisting of the nodes along the shortest tour
   '''
 
-  # Randomly pick a node.
+  # Randomly pick a node to start.
   start_node = random.choice(g.nodes())
+  permute_nodes = g.nodes()
+  permute_nodes.remove(start_node)
 
   min_length = numpy.inf
+  for path in permutations(permute_nodes):
+    prev_node = start_node
+    path_length = 0
+    for node in path:
+      path_length += shortest_path(g, prev_node, node)[0]
+      prev_node = node
+    path_length += shortest_path(g, node, start_node)[0]
+    if path_length < min_length:
+      min_length = path_length
+      shortest_tour = list(path)
+      shortest_tour.insert(0, start_node)
+      shortest_tour.append(start_node)
 
-#  for path in permutations(G.nodes())
+  return (min_length, shortest_tour)
 
 if __name__ == '__main__':
   # Set up a default graph
-
   G = graph()
   G.add_node('A')
   G.add_node('B')
@@ -264,6 +274,6 @@ if __name__ == '__main__':
   G.add_edge('D', 'F', 40)
   G.add_edge('E', 'F', 18)
 
-  PATH = shortest_path(G, 'A', 'D')
-  print PATH[0]
-  print PATH[1]
+  TOUR = salesman_brute(G)
+  print "Optimum tour:", TOUR[1]
+  print "Tour length:", TOUR[0]
