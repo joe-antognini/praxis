@@ -18,14 +18,14 @@ class node(object):
       raise TypeError('node: name must be a string!')
 
     self.name = name
-    self.parent = self
+    self.parent = name
     self.rank = 0
 
 class disjoint_set:
   '''A class implementing the disjoint-set forest data structure.
 
   Methods:
-    make_set: Make a disjoint set out of a single node.
+    makeset: Make a disjoint set out of a single node.
 
     find: Find the root of the tree for a particular node.  This function
       also flattens the tree if run.
@@ -42,15 +42,21 @@ class disjoint_set:
     '''Return a node's properties as a list.'''
 
     # Typechecking
-    if type(name) is not node:
-      raise TypeError('__getitem__(): element must be a node!')
+    if type(name) is not str:
+      raise TypeError('__getitem__(): element name must be a string!')
     elif name not in self.ds_forest:
       raise ValueError('__getitem__(): element must be in forest!')
 
     return [self.ds_forest[name].name, self.ds_forest[name].parent,
       self.ds_forest[name].rank]
 
-  def make_set(self, name):
+  def printstate(self):
+    '''Print the state of the tree.'''
+    for elem in self.ds_forest:
+      print (self.ds_forest[elem].name, self.ds_forest[elem].parent, 
+        self.ds_forest[elem].rank)
+
+  def makeset(self, name):
     '''Make a singleton tree.
 
     Parameters:
@@ -73,15 +79,16 @@ class disjoint_set:
     '''
 
     # Typechecking
-    if type(a) is not node:
+    if type(a) is not str: 
       raise TypeError('find(): parameter must be a node!')
     elif a not in self.ds_forest:
       raise ValueError('find(): node must be in tree!')
 
-    if a.parent == a:
+    if self.ds_forest[a].parent == a:
       return a
     else:
-      self.ds_forest[a].parent = self.find(a.parent)
+      self.ds_forest[a].parent = self.find(self.ds_forest[a].parent)
+      return self.ds_forest[a].parent
 
   def union(self, tree1, tree2):
     '''Join two trees.  The tree with the smaller rank is joined under the
@@ -94,9 +101,9 @@ class disjoint_set:
     '''
 
     # Typechecking
-    if type(tree1) is not node:
+    if type(tree1) is not str:
       raise TypeError('union(): tree1 must be a node!')
-    elif type(tree2) is not node:
+    elif type(tree2) is not str:
       raise TypeError('union(): tree2 must be a node!')
     elif tree1 not in self.ds_forest:
       raise ValueError('union(): tree1 must be in the tree!')
@@ -109,7 +116,30 @@ class disjoint_set:
     if root1 == root2:
       return self.ds_forest
     else:
-      if root1.rank >= root2.rank:
+      if self.ds_forest[root1].rank > self.ds_forest[root2].rank:
         self.ds_forest[root2].parent = root1
       else:
         self.ds_forest[root1].parent = root2
+        if self.ds_forest[root1].rank == self.ds_forest[root2].rank:
+          self.ds_forest[root2].rank += 1
+
+if __name__ == '__main__':
+  ds = disjoint_set()
+  ds.makeset('A')
+  ds.makeset('B')
+  ds.makeset('C')
+  ds.makeset('D')
+  ds.makeset('E')
+  ds.makeset('F')
+  ds.makeset('G')
+
+  ds.union('A', 'D')
+  ds.union('B', 'E')
+  ds.union('C', 'F')
+
+  ds.union('C', 'G')
+  ds.union('E', 'A')
+
+  ds.union('B', 'G')
+
+  ds.printstate()
