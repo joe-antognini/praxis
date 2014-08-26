@@ -33,6 +33,28 @@ class Board:
       old_board = deepcopy(self.board)
       self.constrain()
 
+  def __getitem__(self, idx):
+    '''Return the elements of the board'''
+    if type(idx) is not tuple:
+      i = idx
+      line = []
+      for num in self.board[i]:
+        nonzero = num[np.nonzero(num)].astype(int)
+        if len(nonzero) == 1:
+          line.append(nonzero[0])
+        else:
+          line.append(0)
+      return line
+    elif type(idx) is tuple:
+      i, j = idx
+      nonzero = self.board[i, j][np.nonzero(self.board[i, j])].astype(int)
+      if len(nonzero) == 1:
+        return nonzero[0]
+      else:
+        return 0
+    else:
+      raise IndexError
+
   def in_row(self, i, j, n):
     '''Determines if a number is already in a particular row.'''
     row_constraints = []
