@@ -171,7 +171,7 @@ def solve(boards):
       # If we don't have an impossible position, make a move.
       move(boards, moves)
     
-if __name__ == '__main__'
+if __name__ == '__main__':
   # A sample problem
   board = Board(np.array(
    [[0, 0, 0, 0, 0, 0, 0, 0, 8],
