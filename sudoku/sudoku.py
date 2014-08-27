@@ -29,6 +29,7 @@ class Board:
 
     old_board = deepcopy(self.board)
     self.constrain()
+    self.cross_hatch()
     while not np.array_equal(old_board, self.board):
       old_board = deepcopy(self.board)
       self.constrain()
@@ -113,6 +114,31 @@ class Board:
                 continue
             self.board[i, j, k-1] = 0
 
+  def cross_hatch(self):
+    '''Fill in hidden singles (i.e., cells where there is only one possible
+    cell for a candidate).'''
+    # Check rows
+    for i in range(9):
+      for k in range(1, 10):
+        cell_possibilities = []
+        for j in range(9):
+          if k in self.board[i, j]:
+            cell_possibilities.append(j)
+        if len(cell_possibilities) == 1:
+          self.board[i, cell_possibilities[0]] = [0 if elem != k else k
+            for elem in range(1, 10)]
+    
+    # Check columns
+    for j in range(9):
+      for k in range(1, 10):
+        cell_possibilities = []
+        for i in range(9):
+          if k in self.board[i, j]:
+            cell_possibilities.append(i)
+        if len(cell_possibilities) == 1:
+          self.board[cell_possibilities[0], j] = [0 if elem != k else k
+            for elem in range(1, 10)]
+
   def print_board(self):
     '''Print the board in a pleasing way.'''
     for i in range(9):
@@ -151,10 +177,23 @@ def move(boards, moves):
   possibilities is reached.  Pick one and create a new board.'''
   board = boards[-1]
 
+  for l in range(2, 5):
+    for i in range(9):
+      for j in range(9):
+        possibilities = [elem for elem in board.board[i, j] if elem != 0]
+        if len(possibilities) == l:
+          new_board = deepcopy(board.board)
+          choice = possibilities[0]
+          for k in range(1, 10):
+            if k != choice:
+              new_board[i, j, k-1] = 0
+          boards.append(Board(new_board))
+          moves.append((i, j, choice))
+          return
   for i in range(9):
     for j in range(9):
       possibilities = [elem for elem in board.board[i, j] if elem != 0]
-      if len(possibilities) > 1:
+      if len(possibilities) >= l:
         new_board = deepcopy(board.board)
         choice = possibilities[0]
         for k in range(1, 10):
@@ -177,7 +216,7 @@ def solve(boards):
     if is_impossible(board):
       boards.pop()
       board = boards[-1]
-      i, j, k = moves.pop()
+      i, j, k = map(int, moves.pop())
       board.board[i, j, k-1] = 0
 
       # We now have an edge condition.  If we had two choices and just
