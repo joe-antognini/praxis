@@ -1,14 +1,14 @@
-1    RPN Calculator                   19 Feb 2009  rpn
-2    Sieve of Eratosthenes            19 Feb 2009  sieve_erato
-3    Bingo                            19 Feb 2009  bingo
-4    Sudoku                           19 Feb 2009  sudoku
-5    Flavius Josephus                 19 Feb 2009  flavius_josephus
-6    ROT13                            20 Feb 2009  rot13
-7    Multiple Dwellings               20 Feb 2009  multiple_dwellings
-8    The Digits of Pi                 20 Feb 2009  pi
-9    A Self-Reproducing Program       20 Feb 2009  quine
-10   Mardi Gras                       24 Feb 2009  mardigras
-11   Mark V. Shaney                   27 Feb 2009  markvshaney
-118  Traveling Salesman: Brute Force  12 Mar 2010  salesman_brute
-124  Disjoint Sets                    02 Apr 2010  disjoint_sets
-493  Correct Horse Battery Staple     23 Apr 2013  correcthorse
+1    RPN Calculator                   19 Feb 2009
+2    Sieve of Eratosthenes            19 Feb 2009
+3    Bingo                            19 Feb 2009
+4    Sudoku                           19 Feb 2009
+5    Flavius Josephus                 19 Feb 2009
+6    ROT13                            20 Feb 2009
+7    Multiple Dwellings               20 Feb 2009
+8    The Digits of Pi                 20 Feb 2009
+9    A Self-Reproducing Program       20 Feb 2009
+10   Mardi Gras                       24 Feb 2009
+11   Mark V. Shaney                   27 Feb 2009
+118  Traveling Salesman: Brute Force  12 Mar 2010
+124  Disjoint Sets                    02 Apr 2010
+493  Correct Horse Battery Staple     23 Apr 2013
