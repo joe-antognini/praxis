@@ -4,7 +4,7 @@
 # A library of modular arithmetic functions.
 #
 
-from random import sample
+from random import sample, choice
 
 def gcd(x, y):
   '''Recursively find the greatest common divisor using Euclid's
@@ -210,18 +210,81 @@ def mod_exp(a, b, n):
     half = mod_exp(a, b/2, n)
     return mod_mult(a, mod_mult(half, half, n), n)
 
-def mod_sqrt(a, n):
-  '''Compute the modular square root.  This algorithm assumes that the
+def isquadraticresidue(a, p):
+  '''Determine if a is a quadratic residue of p.  If p is not a prime number
+  the function returns a ValueError.
+
+  Parameters:
+    a: int
+    p: int
+      A prime number
+
+  Returns:
+    bool
+  '''
+
+  # Typechecking
+  if not all(isinstance(item, (int, long)) for item in (a, p)):
+    raise TypeError('isquadraticresidue(): parameters must be integers')
+  if p <= 0:
+    raise ValueError('isquadraticresidue(): exponent must be non-negative')
+  if (not isprime(p)) or (p <= 2):
+    raise ValueError('isquadraticresidue(): modulo must be odd prime')
+
+  if mod_exp(a % p, (p-1)/2, p) == 1:
+    return True
+  else:
+    return False
+
+def mod_sqrt(n, p):
+  '''Compute the modular square root using the Tonelli-Shanks algorithm.
+  The lowest square root is returned.  This algorithm assumes that the
   modulus is prime.  If it is not or a square root does not exist, a
   ValueError is raised.
 
   Parameters:
-    a: int
-
     n: int
+
+    p: int
       Modulo
 
-  Returns: int
+  Returns: tuple
+    The two square roots
   '''
 
+  # Typechecking
+  if not all(isinstance(item, (int, long)) for item in (n, p)):
+    raise TypeError('mod_sqrt(): parameters must be integers')
+  if p <= 0:
+    raise ValueError('mod_sqrt(): exponent must be non-negative')
+  if (not isprime(p)) or (p <= 2):
+    raise ValueError('mod_sqrt(): modulo must be odd prime')
+  if not isquadraticresidue(n, p):
+    raise ValueError('mod_sqrt(): parameter must be a quadratic residue')
 
+  s = 0
+  q = p - 1
+  while q % 2 == 0:
+    s += 1
+    q /= 2
+  
+  z = choice(xrange(1, p))
+  while isquadraticresidue(z, p):
+    z = choice(xrange(1, p))
+  c = mod_exp(z, q, p)
+  r = mod_exp(n, (q + 1) / 2, p)
+  t = mod_exp(n, q, p)
+  m = s
+  while t != 1:
+    for i in range(1, m):
+      if mod_exp(t, 2**i, p) == 1:
+        break
+    b = mod_exp(c, 2**(m-i-1), p)
+    r = mod_mult(r, b, p)
+    c = mod_mult(b, b, p)
+    t = mod_mult(t, c, p)
+    m = i
+
+  if r > p / 2:
+    r = p - r
+  return (r, p - r)
