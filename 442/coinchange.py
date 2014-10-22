@@ -64,9 +64,11 @@ def coin_list(n, coins):
       result1 = []
     coins.append(coin)
     result2 = coin_list(n-coin, coins)
-    result2[0].append(coin)
+    for i, elem in enumerate(result2[:]):
+      result2[i].append(coin)
     return result1 + result2
 
 if __name__ == '__main__':
   print coin_count(40, [1, 5, 10, 25])
-  print coin_list(40, [1, 5, 10, 25])
+  for elem in coin_list(40, [1, 5, 10, 25]):
+    print elem
