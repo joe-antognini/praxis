@@ -1,64 +1,39 @@
 #! /usr/bin/env python
 
-#
-# Sieve of Eratosthenes
-#
-# Programming Praxis
-# Problem 2
-# http://programmingpraxis.com/2009/02/19/sieve-of-eratosthenes/
-#
-
-import sys, time
-import numpy as np
+import bitarray as bt
 from math import sqrt
 
-start_time = time.time()
+def sieve_erato(n):
+  '''Return a list of all primes less than or equal to a given number.
 
-if len(sys.argv) != 2:
-  print "usage: python 2.py n"
-  sys.exit(1)
+  Input:
+    n: int
+  
+  Output:
+    bitarray
+      A bitarray where each bit is False if the number is not prime and True
+      if it is prime. 
+  '''
 
-try:
-  n = int(sys.argv[1])
-except ValueError:
-  print "error: argument must be an integer"
-  sys.exit(1)
+  lst = bt.bitarray((n+1)/2 - 1)
+  lst.setall(True)
 
-if n < 2:
-  print "error: argument must be greater than or equal to 2"
-  sys.exit(1)
+  imax = (int(sqrt(n)) - 1) / 2
+  for i in xrange(imax):
+    if lst[i]:
+      lst[2*i*i+6*i+3::2*i+3] = False
 
-if n == 2:
-  print "2"
-  sys.exit(0)
+  return lst
 
-# Only use a list with odd numbers
-# (Optimization #1)
-primes = [2, 3]
-prime_i = 1
-lst = np.zeros([len(np.arange(5, n+1, 2)), 2])
-lst[:, 0] = np.arange(5, n+1, 2)
+def sievebt2lst(ba):
+  '''Take a bitarray from sieve_erato and print out the prime numbers.'''
+  lst = [2]
+  for i, elem in enumerate(ba):
+    if elem:
+      lst.append(2 * i + 3)
+  return lst
 
-# Only need to do work up to the square root of the maximum number
-# (Optimization #3)
-while primes[prime_i] < sqrt(n):
-  # For any prime we are looking at, anything in the list that is less
-  # than the square of the prime must also be prime.  
-  # (Optimization #2)
-  min_i = np.where(lst[:, 0] == primes[prime_i]**2)[0]
-  new_primes = [elem[0] for elem in lst[:min_i] if elem[1] == 0]
-  lst[:min_i, 1] = np.ones(len(lst[:min_i]))
-  for elem in new_primes:
-    primes.append(elem)
-
-  lst[min_i::primes[prime_i], 1] = \
-    np.ones(len(lst[min_i::primes[prime_i]]))
-  prime_i += 1
-  print int(primes[prime_i])
-
-for elem in lst:
-  if elem[1] == 0:
-    primes.append(elem[0])
-print "Number of primes:", len(primes)
-
-print "Running time:", time.time() - start_time, "seconds"
+if __name__ == '__main__':
+  # Test case
+  prime_array = sieve_erato(15485863)
+  print sum(prime_array) + 1
