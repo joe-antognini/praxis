@@ -2,10 +2,7 @@
 
 import bitarray as bt
 from math import sqrt
-if __name__ == '__main__':
-  from sieve_erato import sieve_erato
-else:
-  from ..ex002.sieve_erato import sieve_erato
+from sieve_erato import sieve_erato
 
 def segmented_sieve(L, R, B):
   '''Perform a segmented Sieve of Eratosthenes.'''
@@ -39,7 +36,8 @@ def segsievebt2lst(ba, min_n, i, block_size):
   return lst
 
 if __name__ == '__main__':
-  MIN_N = 100
+  MIN_N = 0
+#  MIN_N = 100
   MAX_N = 200
   BLOCK_SIZE = 10
   for I, BLOCK in enumerate(segmented_sieve(MIN_N, MAX_N, BLOCK_SIZE)):
