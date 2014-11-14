@@ -3,6 +3,18 @@
 from math import log, sqrt
 from sieve_erato import sieve_erato
 
+def memoize(f):
+  class memodict(dict):
+    def __init__(self, f):
+      self.f = f
+    def __call__(self, *args):
+      return self[args]
+    def __missing__(self, key):
+      ret = self[key] = self.f(*key)
+      return ret
+  return memodict(f)
+
+@memoize
 def legendre_phi(x, a):
   '''Calculate Legendre's phi function.'''
 
@@ -36,4 +48,4 @@ def legendre_pi(n):
     return legendre_phi(n, a) + a - 1
 
 if __name__ == '__main__':
-  print legendre_pi(int(2e3))
+  print legendre_pi(int(1e4))
