@@ -14,28 +14,31 @@ def memoize(f):
       return ret
   return memodict(f)
 
+def prime_n(n):
+  '''Return the n'th prime.'''
+  if n == 0:
+    return 1
+  j = 0
+  count = 1
+  while count != n:
+    primes = sieve_erato(int(2**j * log(n) * n))
+    count = 1
+    for i, elem in enumerate(primes):
+      if elem:
+        count += 1
+        if count == n:
+          break
+    j += 1
+  return 2*i + 3
+
 @memoize
-def legendre_phi(x, a):
+def legendre_phi(x, a, acc=0):
   '''Calculate Legendre's phi function.'''
 
-  if a == 1:
-    return (x+1)/2
-  else:
-    # Find the a'th prime
-    j = 0
-    count = 1
-    while count != a:
-      primes = sieve_erato(int(2**j * log(a) * a))
-      count = 1
-      for i, elem in enumerate(primes):
-        if elem:
-          count += 1
-          if count == a:
-            break
-      j += 1
-    p_a = 2*i + 3
-
-    return legendre_phi(x, a-1) - legendre_phi(x / p_a, a-1)
+  while a > 1:
+    p_a = prime_n(a)
+    (x, a, acc) = (x, a-1, legendre_phi(x/p_a, a-1) + acc)
+  return (x+1)/2 - acc
 
 def legendre_pi(n):
   '''Calculate the number of primes less than or equal to n using Legendre's
@@ -43,9 +46,11 @@ def legendre_pi(n):
 
   if n == 2:
     return 1
+  elif n == 3:
+    return 2
   else:
     a = legendre_pi(int(sqrt(n)))
     return legendre_phi(n, a) + a - 1
 
 if __name__ == '__main__':
-  print legendre_pi(int(1e4))
+  print legendre_pi(int(1e5))
