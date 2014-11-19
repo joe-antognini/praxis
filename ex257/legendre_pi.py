@@ -34,6 +34,9 @@ def prime_n(n):
 @memoize
 def legendre_phi(x, a, acc=0):
   '''Calculate Legendre's phi function.'''
+  
+  if x == 0:
+    return 0
 
   while a > 1:
     p_a = prime_n(a)
@@ -53,4 +56,4 @@ def legendre_pi(n):
     return legendre_phi(n, a) + a - 1
 
 if __name__ == '__main__':
-  print legendre_pi(int(1e5))
+  print legendre_pi(int(1e6))
