@@ -3,6 +3,29 @@
 from astropy.time import Time
 from math import pi, sin, cos, sqrt, acos
 
+def solartransit_0order(lat, lon, date):
+  '''Calculate the time of the solar transit to zeroth order.  This
+  implements Eq. 14.2 of Astronomical Algorithms.
+  '''
+
+  # Get the RA and dec of the Sun on the day, the day before, and the day
+  # after at 0h Dynamical Time.
+  alpha1, dec1 = solar_coords(date - 1)
+  alpha2, dec2 = solar_coords(date)
+  alpha3, dec3 = solar_coords(date + 1)
+
+  # Find out if the Sun is circumpolar at this latitude and time of the
+  # year.
+  if not -1 < sin(lat) * sin(dec2) < 1:
+    raise ValueError(
+    'Sun is circumpolar at this latitude and time of year.  No sunrise or sunset occurs.')
+
+  # For the Sun, h0 = -50'.
+  cos_H0 = ((sin(50./60 * pi/180) - sin(lat) * sin(dec2)) / (cos(lat) * 
+    cos(dec2)))
+
+# The function below is from Wikipedia's sunrise equation page.  It doesn't
+# seem to work.
 def sunset_JD(lat, lon, date):
   '''Calculate the time of sunset.
 
@@ -39,13 +62,15 @@ def sunset_JD(lat, lon, date):
     for i, elem in enumerate(lon):
       dec_lon += float(elem) / 60**i
     lon = dec_lon
-  jd = Time(date, scale='utc').jd
+  jd = Time(date, scale='utc').jd + 1
 
   n_star = jd - 2451545.0009 - lon / 360
   n = int(n_star + .5)
 
   # Approximate Solar noon
   J_star = 2451545.0009 + lon / 360 + n
+
+  print lat, lon
 
   # Solar mean anomaly
   M = (357.5291 + .98560028 * (J_star - 2451545)) % 360
@@ -58,6 +83,8 @@ def sunset_JD(lat, lon, date):
 
   # Solar transit
   J_transit = J_star + .0053 * sin(M) - .0069 * sin(2 * lamb)
+
+  print J_transit
 
   # Declination of the Sun
   sin_dec = sin(lamb * pi / 180) * sin(23.45 * pi / 180)
@@ -90,3 +117,5 @@ def sunset(lat, long, date):
       Time of sunset as a Julian date.
   '''
 
+if __name__ == '__main__':
+  print sunset_JD((39, 59), (82, 59), '2015-01-09')
