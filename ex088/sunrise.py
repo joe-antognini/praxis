@@ -3,10 +3,26 @@
 from astropy.time import Time
 from math import pi, sin, cos, sqrt, acos
 
-def solartransit_0order(lat, lon, date):
-  '''Calculate the time of the solar transit to zeroth order.  This
-  implements Eq. 14.2 of Astronomical Algorithms.
+def solar_coords(date):
+  # TODO
+
+def sunrise_set(lat, lon, date):
+
+  '''Calculate the time of sunrise and sunset.  This implements Chapter 14
+  of Astronomical Algorithms.
+
+  Input:
+    lat: The latitude as a decimal.  West is given positive values.
+
+    lon: The longitude as a decimal. 
+
+    date: The date.
+
+  Output:
+    A tuple with the JD date of the sunrise and sunset.
   '''
+
+  h0 = -.8333
 
   # Get the RA and dec of the Sun on the day, the day before, and the day
   # after at 0h Dynamical Time.
@@ -23,6 +39,50 @@ def solartransit_0order(lat, lon, date):
   # For the Sun, h0 = -50'.
   cos_H0 = ((sin(50./60 * pi/180) - sin(lat) * sin(dec2)) / (cos(lat) * 
     cos(dec2)))
+
+  # The apparent sidereal time at 0h UT at Greenwich
+  theta0 = app_sidereal_t_0h(date)
+
+  m0 = ((alpha2 + lon - theta0) / 360) % 1
+  m1 = (m0 - acos(H0) / pi)
+  m2 = (m0 + acos(H0) / pi)
+
+  theta_rise = theta0 + 360.985647 * m1
+  theta_set = theta0 + 360.985647 * m2
+
+  # The difference in seconds between Terrestrial Time and UTC on the given
+  # date.
+  t = Time(date, scale='utc')
+  Delta_T = t.tt.val - t.utc.jd
+  n = m + Delta_T / 86400
+  
+  # Interpolate to find ra and dec
+  a = alpha2 - alpha1
+  b = alpha3 - alpha2
+  c = b - a
+  ra = alpha2 + n / 2 * (a + b + n * c)
+
+  a = dec2 - dec1
+  b = dec3 - dec2
+  c = b - a
+  dec = dec2 + n / 2 * (a + b + n * c)
+
+  H_rise = theta_rise - lon - ra
+  H_set = theta_set - lon - ra
+
+  h = eqcoor2alt((ra, dec), (lat, lon))[0]
+
+  delta_m = (h - h0) / (360 * cos(dec * pi / 180) * cos(lat * pi / 180))
+  delta_m_rise = delta_m / sin(H_rise * pi / 180)
+  delta_m_set = delta_m / sin(H_set * pi / 180)
+
+  rise_hour = int(24 * (m1 + delta_m_rise))
+  rise_min = int(60 * (24 * (m1 + delta_m_rise) - rise_hour))
+  rise_sec = 60 * (60 * (24 * (m1 + delta_m_rise) - rise_hour) - rise_minute)
+  set_hour = int(24 * (m2 + delta_m_set))
+  set_min = int(60 * (24 * (m2 + delta_m_set) - set_hour))
+  set_sec = 60 * (60 * (24 * (m2 + delta_m_set) - set_hour) - set_minute)
+  return ((rise_hour, rise_min, rise_sec), (set_hour, set_min, set_sec))
 
 # The function below is from Wikipedia's sunrise equation page.  It doesn't
 # seem to work.
