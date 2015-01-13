@@ -1,10 +1,86 @@
 #! /usr/bin/env python
 
 from astropy.time import Time
-from math import pi, sin, cos, sqrt, acos
+from math import *
+
+def app_sidereal_t_0h(date):
+  '''Calculate the apparent sidereal time at Greenwich, 0h on the given
+  date.
+
+  Input:
+    date: The date as a string.
+  
+  Output:
+    The apparent sidereal time at Greenwich, 0h in degrees.
+  '''
+  
+  JD = Time(date, scale='ut').jd
+  T = (JD - 2451545) / 36525.
+
+  theta0 = 100.46061837 + 36000.770053608 * T + .000387933 * T**2
+           - T**3 / 38710000.
+
+  return theta0
+
+def obliquity(date):
+  '''Calculate the obliquity of the ecliptic.
+
+  Input:
+    date: The date as a string
+   
+  Output:
+    The obliquity of the ecliptic in degrees.
+  '''
+
+  JDE = Time(date, scale='tt').jd
+  T = (JDE - 2451545) / 36525.
+
+  epsilon0 = (23 + 26/60. + 21.448/3600
+             - 46.8150/3600 * T
+             - .00059/3600 * T**2
+             + .001813/3600 * T**3)
+
+  return epsilon0
 
 def solar_coords(date):
-  # TODO
+  '''Calculate the RA and Dec of the Sun on the given date.
+
+  Input:
+    date: The date as a string.
+
+  Output:
+    A tuple of the ra and dec.
+  '''
+  
+  JD = Time(date, scale='utc').jd
+  T = (JD - 2451545) / 36525.
+
+  # Geometric mean longitude of the Sun
+  L0 = 280.46645 + 36000.76983 * T + .0003032 * T**2
+  L0 %= 360
+
+  # Mean anomaly of the Sun
+  M = 357.52910 + 35999.0503 * T - .0001559 * T**2 - .00000048 * T**3
+  M %= 360
+
+  # Eccentricity of Earth's orbit
+  e = .016708617 - .000042037 * T - .0000001236 * T**2
+
+  # Equation of center
+  C = ((1.9146 - .004817 * T - .000014 * T**2) * sin(M * pi / 180)
+      + (.019993 - .000101 * T) * sin(2 * M * pi / 180)
+      + .00029 * sin(3 * M * pi / 180))
+
+  # True longitude of the Sun
+  Theta = L0 + C
+
+  # Obliquity of the ecliptic
+  epsilon = obliquity(date)
+
+  ra = atan2(cos(epsilon*pi/180) * sin(Theta*pi/180), cos(Theta*pi/180))
+  dec = asin(sin(epsilon*pi/180) * sin(Theta*pi/180))
+
+  return (ra*180/pi, dec*180/pi)
 
 def sunrise_set(lat, lon, date):
 
@@ -85,7 +161,7 @@ def sunrise_set(lat, lon, date):
   return ((rise_hour, rise_min, rise_sec), (set_hour, set_min, set_sec))
 
 # The function below is from Wikipedia's sunrise equation page.  It doesn't
-# seem to work.
+# seem to work very well.
 def sunset_JD(lat, lon, date):
   '''Calculate the time of sunset.
 
@@ -178,4 +254,5 @@ def sunset(lat, long, date):
   '''
 
 if __name__ == '__main__':
-  print sunset_JD((39, 59), (82, 59), '2015-01-09')
+  print solar_coords('1992-10-13')
+#  print sunset_JD((39, 59), (82, 59), '2015-01-09')
