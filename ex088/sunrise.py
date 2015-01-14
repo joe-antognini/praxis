@@ -14,13 +14,44 @@ def app_sidereal_t_0h(date):
     The apparent sidereal time at Greenwich, 0h in degrees.
   '''
   
-  JD = Time(date, scale='ut').jd
+  JD = Time(date, scale='utc').jd
   T = (JD - 2451545) / 36525.
+  print T
 
-  theta0 = 100.46061837 + 36000.770053608 * T + .000387933 * T**2
-           - T**3 / 38710000.
+  JDE = Time(date, scale='tt').jd
+  TE = (JDE - 2451545) / 36525
 
-  return theta0
+  # The mean sidereal time
+  theta0 = (100.46061837 + 36000.770053608 * T + .000387933 * T**2
+           - T**3 / 38710000.) % 360
+
+  print theta0
+
+  # Next calculate the correction to get the apparent sidereal time.
+
+  # Longitude of the Moon's argument of latitude
+  Omega = ((125.04452 - 1934.136261 * TE + .0020708 * TE**2 + TE**3 / 
+    450000.) % 360)
+  print "Omega:", Omega
+
+  # Mean longitudes of the Sun and Moon
+  L = 280.4665 + 36000.7698 * TE
+  Lp = 218.3165 + 481267.8813 * TE
+
+  # These quantities are in arcseconds
+  Delta_psi = (-17.2 * sin(Omega*pi/180) - 1.32 * sin(2*L*pi/180) - .23 *
+              sin(2*Lp*pi/180) + .21 * sin(2*Omega*pi/180))
+  print "Delta_psi:", Delta_psi
+  Delta_eps = (9.2 * cos(Omega*pi/180) + .57 * cos(2*L*pi/180) + .1 *
+              cos(2*Lp*pi/180) - .09 * cos(2*Omega*pi/180))
+
+  epsilon = obliquity(date)
+  print "epsilon:", epsilon + Delta_eps/3600
+
+  print Delta_psi * cos((epsilon + Delta_eps/3600.)*pi/180) / 15
+
+  return (theta0 + Delta_psi * cos((epsilon + Delta_eps/3600.)*pi/180) 
+          / 3600)
 
 def obliquity(date):
   '''Calculate the obliquity of the ecliptic.
@@ -254,5 +285,5 @@ def sunset(lat, long, date):
   '''
 
 if __name__ == '__main__':
-  print solar_coords('1992-10-13')
+  print app_sidereal_t_0h('1987-04-10')
 #  print sunset_JD((39, 59), (82, 59), '2015-01-09')
